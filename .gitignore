@@ -1,0 +1,9 @@
+# editors
+.vscode
+
+# os metadata
+.DS_Store
+
+# dependency directory
+node_modules
+
