@@ -23,6 +23,8 @@ class OAuth2Model {
   }
 
   async getAccessToken(bearerToken) {
+    debug('getAccessToken');
+
     const token = await this.redisClient.hgetall(fmt(formats.token, bearerToken));
 
     if (!token || token.accessToken !== bearerToken) {
@@ -37,11 +39,14 @@ class OAuth2Model {
   }
 
   async getRefreshToken(bearerToken) {
+    debug('getRefreshToken');
+
     const token = await this.redisClient.hgetall(fmt(formats.token, bearerToken));
 
     if (!token || token.accessToken !== bearerToken) {
       return;
     }
+
 
     return {
       ...token
@@ -49,9 +54,17 @@ class OAuth2Model {
   }
 
   async getAuthorizationCode(authorizationCode) {
+    debug('getAuthorizationCode');
+
     const code = await this.redisClient.hgetall(fmt(formats.code, authorizationCode));
 
-    if (!code || code.code !== authorizationCode) {
+    code.client = { id: code.clientId };
+    code.user = { id: code.userId };
+    code.expiresAt = new Date(code.expiresAt);
+
+    debug(code);
+
+    if (!code) {
       return;
     }
 
@@ -62,10 +75,14 @@ class OAuth2Model {
     };
   }
 
-  async getClient(clientId, clientSecret) {
+  async getClient(clientId) {
+    debug('getClient %s', clientId);
+
     const client = await this.redisClient.hgetall(fmt(formats.client, clientId));
 
-    if (!client || client.clientSecret !== clientSecret) {
+    debug(client);
+
+    if (!client) {
       return;
     }
 
@@ -73,17 +90,26 @@ class OAuth2Model {
 
     return {
       ...client,
-      grants: ['authorization_code', 'refresh_token']
+      grants: client.grants.split(',')
     };
   }
 
   async saveToken(token, client, user) {
+    debug('saveToken');
+
     const pipe = this.redisClient.pipeline();
+
     token.clientId = client.clientId;
     token.userId = user.id;
+
     const data = {
-      ...token
+      ...token,
+      client: { id: client.clientId },
+      user: { id: user.id }
     };
+
+    debug(token);
+
     await pipe
       .hmset(fmt(formats.token, token.accessToken), token)
       .hmset(fmt(formats.token, token.refreshToken), token)
@@ -91,16 +117,17 @@ class OAuth2Model {
       .then(() => {
         debug('saveToken: token %s saved successfully', token);
       });
+
     return data;
   }
 
   async saveAuthorizationCode(code, client, user) {
-    code.client = {
-      id: client.id
-    };
-    code.uesr = {
-      id: user.id
-    };
+    debug('saveAuthorizationCode');
+
+    code.clientId = client.id;
+    code.userId = user.id;
+
+    debug(code);
 
     const data = { ...code };
 
@@ -110,16 +137,21 @@ class OAuth2Model {
   }
 
   async revokeToken(token) {
+    debug('revokeToken');
+
     const result = await this.redisClient.del(fmt(formats.token, token.refreshToken));
     return result !== 0;
   }
 
   async revokeAuthorizationCode(code) {
+    debug('revokeAuthorizationCode');
+
     const result = await this.redisClient.del(fmt(formats.code, code.authorizationCode));
     return result !== 0;
   }
 
   async verifyScope(accessToken, scope) {
+    debug('verifyScope');
     return true;
   }
 }
