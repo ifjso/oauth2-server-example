@@ -25,6 +25,7 @@ class OAuth2Service {
 
       res.json(token);
     } catch (err) {
+      console.error(err);
       res.status(err.code || 500).json(err);
     }
   }
@@ -41,6 +42,7 @@ class OAuth2Service {
 
       // next();
     } catch (err) {
+      console.error(err);
       res.status(err.code || 500).json(err);
     }
   }
@@ -62,6 +64,7 @@ class OAuth2Service {
 
       res.redirect(`${req.body.redirect_uri}?code=${code.authorizationCode}&state=${req.body.state}`);
     } catch (err) {
+      console.error(err);
       res.status(err.code || 500).json(err);
     }
   }

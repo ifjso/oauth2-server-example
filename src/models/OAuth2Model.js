@@ -22,12 +22,12 @@ class OAuth2Model {
     this.revokeAuthorizationCode = this.revokeAuthorizationCode.bind(this);
   }
 
-  async getAccessToken(bearerToken) {
+  async getAccessToken(accessToken) {
     debug('getAccessToken');
 
-    const token = await this.redisClient.hgetall(fmt(formats.token, bearerToken));
+    const token = await this.redisClient.hgetall(fmt(formats.token, accessToken));
 
-    if (!token || token.accessToken !== bearerToken) {
+    if (!token || token.accessToken !== accessToken) {
       return;
     }
 
@@ -38,18 +38,22 @@ class OAuth2Model {
     };
   }
 
-  async getRefreshToken(bearerToken) {
+  async getRefreshToken(refreshToken) {
     debug('getRefreshToken');
 
-    const token = await this.redisClient.hgetall(fmt(formats.token, bearerToken));
+    const token = await this.redisClient.hgetall(fmt(formats.token, refreshToken));
 
-    if (!token || token.accessToken !== bearerToken) {
+    if (!token || token.refreshToken !== refreshToken) {
       return;
     }
 
+    debug(token);
 
     return {
-      ...token
+      ...token,
+      refreshTokenExpiresAt: new Date(token.refreshTokenExpiresAt),
+      client: { id: token.clientId },
+      user: { id: token.userId }
     };
   }
 
@@ -57,10 +61,6 @@ class OAuth2Model {
     debug('getAuthorizationCode');
 
     const code = await this.redisClient.hgetall(fmt(formats.code, authorizationCode));
-
-    code.client = { id: code.clientId };
-    code.user = { id: code.userId };
-    code.expiresAt = new Date(code.expiresAt);
 
     debug(code);
 
@@ -71,13 +71,18 @@ class OAuth2Model {
     debug('getAuthorizationCode: sent authorization code successfully');
 
     return {
-      ...code
+      ...code,
+      expiresAt: new Date(code.expiresAt),
+      client: { id: code.clientId },
+      user: { id: code.uesrId }
     };
   }
 
-  async getClient(clientId) {
-    debug('getClient %s', clientId);
+  async getClient(clientId, clientSecret) {
+    debug('getClient %s %s', clientId, clientSecret);
 
+    // TODO mysql
+    // TODO clientSecret가 null이 아니면 검색 조건 쿼리에 포함되어야 함
     const client = await this.redisClient.hgetall(fmt(formats.client, clientId));
 
     debug(client);
@@ -88,8 +93,11 @@ class OAuth2Model {
 
     debug('Sent client details successfully');
 
+    const { secret, ...clonedClient } = client;
+
     return {
-      ...client,
+      ...clonedClient,
+      redirectUris: client.redirectUris.split(','),
       grants: client.grants.split(',')
     };
   }
@@ -99,41 +107,47 @@ class OAuth2Model {
 
     const pipe = this.redisClient.pipeline();
 
-    token.clientId = client.clientId;
-    token.userId = user.id;
-
-    const data = {
+    const tokenToSave = {
       ...token,
-      client: { id: client.clientId },
-      user: { id: user.id }
+      clientId: client.id,
+      userId: user.id
     };
 
     debug(token);
 
+    // TODO redis expire
     await pipe
-      .hmset(fmt(formats.token, token.accessToken), token)
-      .hmset(fmt(formats.token, token.refreshToken), token)
+      .hmset(fmt(formats.token, token.accessToken), tokenToSave)
+      .hmset(fmt(formats.token, token.refreshToken), tokenToSave)
       .exec()
       .then(() => {
-        debug('saveToken: token %s saved successfully', token);
+        debug('saveToken: token %s saved successfully', tokenToSave);
       });
 
-    return data;
+    return {
+      ...tokenToSave,
+      client: { id: client.clientId },
+      user: { id: user.id }
+    };
   }
 
   async saveAuthorizationCode(code, client, user) {
     debug('saveAuthorizationCode');
 
-    code.clientId = client.id;
-    code.userId = user.id;
-
     debug(code);
 
-    const data = { ...code };
+    const codeToSave = {
+      ...code,
+      clientId: client.id,
+      userId: user.id
+    };
 
-    await this.redisClient.hmset(fmt(formats.code, code.authorizationCode), code);
+    // TODO redis expire
+    await this.redisClient.hmset(fmt(formats.code, code.authorizationCode), codeToSave);
 
-    return data;
+    return {
+      ...codeToSave
+    };
   }
 
   async revokeToken(token) {
