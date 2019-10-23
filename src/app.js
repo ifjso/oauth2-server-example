@@ -1,35 +1,55 @@
+import express from 'express';
+import http from 'http';
+import Debug from 'debug';
+import config from './config';
+import loaders from './loaders';
 
-const express = require('express');
-const logger = require('morgan');
-const OAuth2Service = require('./services/OAuth2Service.js');
+const debug = Debug('app');
 
+// const startServer = () => {
 const app = express();
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+loaders({ app });
 
-// app.get('/oauth/authorize', OAuth2Service.authorize); // TODO login page
-app.post('/oauth/authorize', OAuth2Service.authorize);
-app.post('/oauth/token', OAuth2Service.token);
+const port = config.port || 3000;
+app.set('port', port);
 
-// app.get('/oauth/authorize', OAuth2Service.authorize);
-// app.use(OAuth2Service.authenticate);
+const server = http.createServer(app);
 
-app.get('/', (req, res) => res.send('Congratulations, you are in a secret area!'));
+const errorHandler = (error) => {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
 
-// app.use((req, res, next) => {
-//   const err = new Error('Not found');
-//   err.status = 404;
-//   next(err);
-// });
+  const bind = typeof port === 'string'
+    ? `Pipe ${port}`
+    : `Port ${port}`;
 
-// app.use((err, req, res) => {
-//   res.locals.message = err.message;
-//   res.locals.error = err;
-//   res.status(err.status || 500);
-//   console.log('use');
-//   res.json(err);
-// });
+  switch (error.code) {
+    case 'EACCES':
+      console.error(`${bind} requires elevated privileges`);
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(`${bind} is already in use`);
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+};
 
-module.exports = app;
+const listeningHandler = () => {
+  const addr = server.address();
+  const bind = typeof addr === 'string'
+    ? `pipe ${addr}`
+    : `port ${addr.port}`;
+  debug(`Listening on ${bind}`);
+};
+
+server.listen(port);
+server.on('error', errorHandler);
+server.on('listening', listeningHandler);
+// };
+
+// startServer();

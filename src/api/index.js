@@ -1,10 +1,9 @@
-const express = require('express');
+import { Router } from 'express';
+import oauth from './routes/oauth';
 
-const router = express.Router();
+export default () => {
+  const app = Router();
+  oauth(app);
 
-/* GET home page. */
-router.get('/', (req, res) => {
-  res.render('index', { title: 'Express' });
-});
-
-module.exports = router;
+  return app;
+};

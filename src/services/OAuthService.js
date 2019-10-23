@@ -1,25 +1,20 @@
+import OAuthServer, { Request, Response } from 'oauth2-server';
+import Debug from 'debug';
 
-const debug = require('debug')('OAuth2Service');
-const OAuth2Server = require('oauth2-server');
-const OAuth2Model = require('../models/OAuth2Model');
+const debug = Debug('OAuthService');
 
-const { Request, Response } = OAuth2Server;
-
-class OAuth2Service {
+class OAuthService {
   constructor(model) {
-    this.oauth2 = new OAuth2Server({ model });
-    this.token = this.token.bind(this);
-    this.authenticate = this.authenticate.bind(this);
-    this.authorize = this.authorize.bind(this);
+    this.oauth = new OAuthServer({ model });
   }
 
-  async token(req, res) {
+  token = async (req, res) => {
     debug('tokenHandler');
     try {
       const request = new Request(req);
       const response = new Response(res);
 
-      const token = await this.oauth2.token(request, response);
+      const token = await this.oauth.token(request, response);
 
       debug('tokenHandler: token %s obtained successfully');
 
@@ -30,13 +25,13 @@ class OAuth2Service {
     }
   }
 
-  async authenticate(req, res, next) {
+  authenticate = async (req, res, next) => {
     debug('authenticateHandler');
     try {
       const request = new Request(req);
       const response = new Response(res);
 
-      await this.oauth2.authenticate(request, response);
+      await this.oauth.authenticate(request, response);
 
       debug('the request was successfully authenticated');
 
@@ -47,14 +42,14 @@ class OAuth2Service {
     }
   }
 
-  async authorize(req, res, next) {
+  authorize = async (req, res, next) => {
     debug('authorizeHandler');
 
     try {
       const request = new Request(req);
       const response = new Response(res);
 
-      const code = await this.oauth2.authorize(request, response, {
+      const code = await this.oauth.authorize(request, response, {
         authenticateHandler: {
           handle: (request, response) => ({ id: '1' })
         }
@@ -70,4 +65,4 @@ class OAuth2Service {
   }
 }
 
-module.exports = new OAuth2Service(OAuth2Model);
+export default OAuthService;

@@ -1,31 +1,26 @@
-const debug = require('debug')('OAuth2Model');
-const Redis = require('ioredis');
-const fmt = require('util').format;
+import Redis from 'ioredis';
+import { format as fmt } from 'util';
+import Debug from 'debug';
 
-const formats = {
+const debug = Debug('OAuthModel');
+
+const keyFormats = {
   client: 'clients:%s',
   token: 'tokens:%s',
   user: 'users:%s',
   code: 'codes:%s'
 };
 
-class OAuth2Model {
+class OAuthModel {
   constructor() {
     this.redisClient = new Redis();
-    this.getAccessToken = this.getAccessToken.bind(this);
-    this.getRefreshToken = this.getRefreshToken.bind(this);
-    this.getAuthorizationCode = this.getAuthorizationCode.bind(this);
-    this.getClient = this.getClient.bind(this);
-    this.saveToken = this.saveToken.bind(this);
-    this.saveAuthorizationCode = this.saveAuthorizationCode.bind(this);
-    this.revokeToken = this.revokeToken.bind(this);
-    this.revokeAuthorizationCode = this.revokeAuthorizationCode.bind(this);
   }
 
-  async getAccessToken(accessToken) {
+  getAccessToken = async (accessToken) => {
     debug('getAccessToken');
 
-    const token = await this.redisClient.hgetall(fmt(formats.token, accessToken));
+    // TODO cache mysql
+    const token = await this.redisClient.hgetall(fmt(keyFormats.token, accessToken));
 
     if (!token || token.accessToken !== accessToken) {
       return;
@@ -38,10 +33,11 @@ class OAuth2Model {
     };
   }
 
-  async getRefreshToken(refreshToken) {
+  getRefreshToken = async (refreshToken) => {
     debug('getRefreshToken');
 
-    const token = await this.redisClient.hgetall(fmt(formats.token, refreshToken));
+    // TODO cache mysql
+    const token = await this.redisClient.hgetall(fmt(keyFormats.token, refreshToken));
 
     if (!token || token.refreshToken !== refreshToken) {
       return;
@@ -57,10 +53,10 @@ class OAuth2Model {
     };
   }
 
-  async getAuthorizationCode(authorizationCode) {
+  getAuthorizationCode = async (authorizationCode) => {
     debug('getAuthorizationCode');
 
-    const code = await this.redisClient.hgetall(fmt(formats.code, authorizationCode));
+    const code = await this.redisClient.hgetall(fmt(keyFormats.code, authorizationCode));
 
     debug(code);
 
@@ -78,12 +74,12 @@ class OAuth2Model {
     };
   }
 
-  async getClient(clientId, clientSecret) {
+  getClient = async (clientId, clientSecret) => {
     debug('getClient %s %s', clientId, clientSecret);
 
-    // TODO mysql
+    // TODO mysql, delete redis
     // TODO clientSecret가 null이 아니면 검색 조건 쿼리에 포함되어야 함
-    const client = await this.redisClient.hgetall(fmt(formats.client, clientId));
+    const client = await this.redisClient.hgetall(fmt(keyFormats.client, clientId));
 
     debug(client);
 
@@ -102,12 +98,12 @@ class OAuth2Model {
     };
   }
 
-  async saveToken(token, client, user) {
+  saveToken = async (token, client, user) => {
     debug('saveToken');
 
     const pipe = this.redisClient.pipeline();
 
-    const tokenToSave = {
+    const clonedToken = {
       ...token,
       clientId: client.id,
       userId: user.id
@@ -117,57 +113,64 @@ class OAuth2Model {
 
     // TODO redis expire
     await pipe
-      .hmset(fmt(formats.token, token.accessToken), tokenToSave)
-      .hmset(fmt(formats.token, token.refreshToken), tokenToSave)
+      .hmset(fmt(keyFormats.token, token.accessToken), clonedToken)
+      .hmset(fmt(keyFormats.token, token.refreshToken), clonedToken)
       .exec()
       .then(() => {
-        debug('saveToken: token %s saved successfully', tokenToSave);
+        debug('saveToken: token %s saved successfully', clonedToken);
       });
 
+    // TODO save mysql
+
     return {
-      ...tokenToSave,
+      ...clonedToken,
       client: { id: client.clientId },
       user: { id: user.id }
     };
   }
 
-  async saveAuthorizationCode(code, client, user) {
+  saveAuthorizationCode = async (code, client, user) => {
     debug('saveAuthorizationCode');
 
     debug(code);
 
-    const codeToSave = {
+    const clonedCode = {
       ...code,
       clientId: client.id,
       userId: user.id
     };
 
     // TODO redis expire
-    await this.redisClient.hmset(fmt(formats.code, code.authorizationCode), codeToSave);
+    await this.redisClient.hmset(fmt(keyFormats.code, code.authorizationCode), clonedCode);
+
+    // TODO save mysql
 
     return {
-      ...codeToSave
+      ...clonedCode
     };
   }
 
-  async revokeToken(token) {
+  revokeToken = async (token) => {
     debug('revokeToken');
 
-    const result = await this.redisClient.del(fmt(formats.token, token.refreshToken));
+    const result = await this.redisClient.del(fmt(keyFormats.token, token.refreshToken));
+
+    // TODO delete mysql
+
     return result !== 0;
   }
 
-  async revokeAuthorizationCode(code) {
+  revokeAuthorizationCode = async (code) => {
     debug('revokeAuthorizationCode');
 
-    const result = await this.redisClient.del(fmt(formats.code, code.authorizationCode));
+    const result = await this.redisClient.del(fmt(keyFormats.code, code.authorizationCode));
     return result !== 0;
   }
 
-  async verifyScope(accessToken, scope) {
+  verifyScope = (accessToken, scope) => {
     debug('verifyScope');
     return true;
   }
 }
 
-module.exports = new OAuth2Model();
+export default OAuthModel;
