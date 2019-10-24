@@ -10,20 +10,21 @@ export default (app) => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
 
-  app.use(routes());
+  app.use(config.api.prefix, routes());
 
-  // app.use((req, res, next) => {
-  //   const err = new Error('Not found');
-  //   err.status = 404;
-  //   next(err);
-  // });
+  app.use((req, res, next) => {
+    const err = new Error('Not found');
+    err.status = 404;
+    next(err);
+  });
 
-  // app.use((err, req, res) => {
-  //   res.status(err.status || 500);
-  //   res.json({
-  //     errors: {
-  //       message: err.message
-  //     }
-  //   });
-  // });
+  app.use((err, req, res, next) => {
+    console.log(err);
+    res.status(err.status || 500);
+    res.json({
+      errors: {
+        message: err.message
+      }
+    });
+  });
 };

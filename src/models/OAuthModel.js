@@ -70,7 +70,7 @@ class OAuthModel {
       ...code,
       expiresAt: new Date(code.expiresAt),
       client: { id: code.clientId },
-      user: { id: code.uesrId }
+      user: { id: code.userId }
     };
   }
 
@@ -101,6 +101,9 @@ class OAuthModel {
   saveToken = async (token, client, user) => {
     debug('saveToken');
 
+    debug(token);
+    debug(client);
+    debug(user);
     const pipe = this.redisClient.pipeline();
 
     const clonedToken = {
@@ -108,6 +111,8 @@ class OAuthModel {
       clientId: client.id,
       userId: user.id
     };
+
+    debug(clonedToken);
 
     debug(token);
 
