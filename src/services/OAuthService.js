@@ -1,50 +1,44 @@
 import OAuthServer, { Request, Response } from 'oauth2-server';
-import Debug from 'debug';
+import debug from 'debug';
 
-const debug = Debug('OAuthService');
+const log = debug('OAuthService:log');
 
 class OAuthService {
   constructor(model) {
     this.oauth = new OAuthServer({ model });
   }
 
-  token = async (req, res) => {
-    debug('tokenHandler');
+  token = async (req, res, next) => {
     try {
       const request = new Request(req);
       const response = new Response(res);
 
       const token = await this.oauth.token(request, response);
 
-      debug('tokenHandler: token %s obtained successfully');
+      log('Successfully obtained a token.');
 
       res.json(token);
     } catch (err) {
-      console.error(err);
-      res.status(err.code || 500).json(err);
+      next(err);
     }
   }
 
   authenticate = async (req, res, next) => {
-    debug('authenticateHandler');
     try {
       const request = new Request(req);
       const response = new Response(res);
 
-      await this.oauth.authenticate(request, response);
+      const token = await this.oauth.authenticate(request, response);
 
-      debug('the request was successfully authenticated');
+      log('Successfully authenticated.');
 
-      // next();
+      res.json(token);
     } catch (err) {
-      console.error(err);
-      res.status(err.code || 500).json(err);
+      next(err);
     }
   }
 
   authorize = async (req, res, next) => {
-    debug('authorizeHandler');
-
     try {
       const request = new Request(req);
       const response = new Response(res);
@@ -55,12 +49,11 @@ class OAuthService {
         }
       });
 
-      debug('the request was successfully authorized');
+      log('Successfully authorized.');
 
       res.redirect(`${req.body.redirect_uri}?code=${code.authorizationCode}&state=${req.body.state}`);
     } catch (err) {
-      console.error(err);
-      res.status(err.code || 500).json(err);
+      next(err);
     }
   }
 }

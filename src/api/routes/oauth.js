@@ -11,7 +11,5 @@ export default (app) => {
   // route.get('/oauth/authorize', OAuthService.authorize); // TODO login page
   route.post('/authorize', oauthService.authorize);
   route.post('/token', oauthService.token);
-
-  // route.get('/oauth/authorize', OAuthService.authorize);
-  // route.use(OAuthService.authenticate);
+  route.get('/authenticate', oauthService.authenticate);
 };
