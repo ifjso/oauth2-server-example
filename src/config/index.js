@@ -1,10 +1,16 @@
-import dotenv from 'dotenv';
+import dotenv from 'dotenv-flow';
 
 dotenv.config();
 
 export default {
   port: parseInt(process.env.PORT, 10),
+
   api: {
-    prefix: '/api'
+    prefix: process.env.BASE_PATH
+  },
+
+  redis: {
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT
   }
 };
