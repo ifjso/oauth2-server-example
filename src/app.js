@@ -1,53 +1,37 @@
 import express from 'express';
-import http from 'http';
 import config from './config';
 import loaders from './loaders';
 import log from './logger';
+import oauth from './oauth2';
 
-const startServer = () => {
-  const app = express();
+const app = express();
 
-  loaders(app);
+loaders(app);
 
-  const port = config.port || 3000;
-  app.set('port', port);
+app.get('/status', (req, res) => {
+  res.status(200).end();
+});
 
-  const server = http.createServer(app);
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-  server.listen(port);
-  server.on('error', handleError);
-  server.on('listening', handleListening);
+app.use(config.api.prefix, oauth);
 
-  function handleError(error) {
-    if (error.syscall !== 'listen') {
-      throw error;
+app.use((req, res, next) => {
+  const err = new Error('Not found');
+  err.status = 404;
+  next(err);
+});
+
+app.use((err, req, res, next) => {
+  log.error(err.stack);
+
+  res.status(err.status || 500);
+  res.json({
+    errors: {
+      message: err.message
     }
+  });
+});
 
-    const bind = typeof port === 'string'
-      ? `Pipe ${port}`
-      : `Port ${port}`;
-
-    switch (error.code) {
-      case 'EACCES':
-        log.error(`${bind} requires elevated privileges`);
-        process.exit(1);
-        break;
-      case 'EADDRINUSE':
-        log.error(`${bind} is already in use`);
-        process.exit(1);
-        break;
-      default:
-        throw error;
-    }
-  }
-
-  function handleListening() {
-    const addr = server.address();
-    const bind = typeof addr === 'string'
-      ? `pipe ${addr}`
-      : `port ${addr.port}`;
-    log.info(`Listening on ${bind}`);
-  }
-};
-
-startServer();
+export default app;

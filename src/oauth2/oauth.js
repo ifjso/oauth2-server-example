@@ -1,8 +1,8 @@
 import Redis from 'ioredis';
 import { format as fmt } from 'util';
 import omit from 'lodash/omit';
-import config from '../config';
 import log from '../logger';
+import config from '../config';
 
 const keyFormats = {
   client: 'clients:%s',
@@ -11,7 +11,7 @@ const keyFormats = {
   code: 'codes:%s'
 };
 
-class OAuthModel {
+class OAuth {
   constructor() {
     this.redisClient = new Redis({ ...config.redis });
   }
@@ -154,4 +154,4 @@ class OAuthModel {
   }
 }
 
-export default OAuthModel;
+export default OAuth;

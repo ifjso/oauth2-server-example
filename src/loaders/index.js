@@ -1,7 +1,5 @@
-import httpLoggerLoader from './http-logger';
-import expressLoader from './express';
+import httpLoggerLoader from './logger';
 
 export default (app) => {
   httpLoggerLoader(app);
-  expressLoader(app);
 };
