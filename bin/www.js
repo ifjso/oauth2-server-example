@@ -1,9 +1,7 @@
-#!/usr/bin/env node
-
-const http = require('http');
-const app = require('../src/app');
-const config = require('../src/config');
-const log = require('../src/logger');
+import http from 'http';
+import app from '../src/app';
+import config from '../src/config';
+import log from '../src/logger';
 
 const port = normalizePort(config.port || '3000');
 app.set('port', port);
