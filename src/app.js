@@ -1,19 +1,19 @@
 import express from 'express';
+import morgan from 'morgan';
 import config from './config';
-import loaders from './loaders';
-import log from './logger';
+import { log, stream } from './logger';
 import oauth from './oauth2';
 
 const app = express();
 
-loaders(app);
+app.use(morgan('short', { stream }));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 app.get('/status', (req, res) => {
   res.status(200).end();
 });
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 
 app.use(config.api.prefix, oauth);
 

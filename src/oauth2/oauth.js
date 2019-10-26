@@ -1,7 +1,7 @@
 import Redis from 'ioredis';
 import { format as fmt } from 'util';
 import omit from 'lodash/omit';
-import log from '../logger';
+import { log } from '../logger';
 import config from '../config';
 
 const keyFormats = {

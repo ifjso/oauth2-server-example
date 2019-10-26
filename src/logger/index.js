@@ -28,7 +28,7 @@ const logOptions = {
   }
 };
 
-const logger = winston.createLogger({
+const log = winston.createLogger({
   level: 'info',
   format: combine(
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
@@ -53,7 +53,11 @@ const logger = winston.createLogger({
 });
 
 if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console(logOptions.console));
+  log.add(new winston.transports.Console(logOptions.console));
 }
 
-export default logger;
+const stream = {
+  write: (message) => log.info(message)
+};
+
+export { log, stream };

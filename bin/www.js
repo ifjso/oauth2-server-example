@@ -1,7 +1,7 @@
 import http from 'http';
 import app from '../src/app';
 import config from '../src/config';
-import log from '../src/logger';
+import { log } from '../src/logger';
 
 const port = normalizePort(config.port || '3000');
 app.set('port', port);

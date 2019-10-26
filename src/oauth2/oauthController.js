@@ -1,6 +1,6 @@
 import OAuthServer, { Request, Response } from 'oauth2-server';
 import OAuth from './oauth';
-import log from '../logger';
+import { log } from '../logger';
 
 const oauth = new OAuthServer({ model: new OAuth() });
 
