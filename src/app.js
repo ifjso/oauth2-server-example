@@ -1,11 +1,8 @@
 import express from 'express';
 import http from 'http';
-import debug from 'debug';
 import config from './config';
 import loaders from './loaders';
-
-const log = debug('app:log');
-const logError = debug('app:error');
+import log from './logger';
 
 const startServer = () => {
   const app = express();
@@ -32,11 +29,11 @@ const startServer = () => {
 
     switch (error.code) {
       case 'EACCES':
-        logError(`${bind} requires elevated privileges`);
+        log.error(`${bind} requires elevated privileges`);
         process.exit(1);
         break;
       case 'EADDRINUSE':
-        logError(`${bind} is already in use`);
+        log.error(`${bind} is already in use`);
         process.exit(1);
         break;
       default:
@@ -49,7 +46,7 @@ const startServer = () => {
     const bind = typeof addr === 'string'
       ? `pipe ${addr}`
       : `port ${addr.port}`;
-    log(`Listening on ${bind}`);
+    log.info(`Listening on ${bind}`);
   }
 };
 

@@ -1,10 +1,8 @@
 import Redis from 'ioredis';
 import { format as fmt } from 'util';
 import omit from 'lodash/omit';
-import debug from 'debug';
 import config from '../config';
-
-const log = debug('OAuthModel:log');
+import log from '../logger';
 
 const keyFormats = {
   client: 'clients:%s',
@@ -26,7 +24,7 @@ class OAuthModel {
       return;
     }
 
-    log('Access token is found: %s', token.accessToken);
+    log.info('Access token is found: %s', token.accessToken);
 
     return {
       accessToken: token.accessToken,
@@ -44,7 +42,7 @@ class OAuthModel {
       return;
     }
 
-    log('Refresh token is found: %s', token.refreshToken);
+    log.info('Refresh token is found: %s', token.refreshToken);
 
     return {
       refreshToken: token.refreshToken,
@@ -61,7 +59,7 @@ class OAuthModel {
       return;
     }
 
-    log('Authorization code is found: %s', code.authorizationCode);
+    log.info('Authorization code is found: %s', code.authorizationCode);
 
     return {
       ...omit(code, ['scope', 'clientId', 'userId']),
@@ -80,7 +78,7 @@ class OAuthModel {
       return;
     }
 
-    log('Client is found: %s', client.id);
+    log.info('Client is found: %s', client.id);
 
     return {
       ...omit(client, 'secret'),
@@ -107,7 +105,7 @@ class OAuthModel {
       .exec();
 
     // TODO save mysql
-    log('Token has been saved:%s, %s', token.accessToken, token.refreshToken);
+    log.info('Token has been saved:%s, %s', token.accessToken, token.refreshToken);
 
     return {
       ...omit(token, ['authorizationCode', 'scope']),
@@ -128,7 +126,7 @@ class OAuthModel {
 
     // TODO save mysql
 
-    log('Authorization code has been saved: %s', code.authorizationCode);
+    log.info('Authorization code has been saved: %s', code.authorizationCode);
 
     return {
       ...omit(code, 'scope'),
@@ -142,7 +140,7 @@ class OAuthModel {
 
     // TODO delete mysql
 
-    log('Token has been revoked: %s', token.refreshToken);
+    log.info('Token has been revoked: %s', token.refreshToken);
 
     return result !== 0;
   }
@@ -150,7 +148,7 @@ class OAuthModel {
   revokeAuthorizationCode = async (code) => {
     const result = await this.redisClient.del(fmt(keyFormats.code, code.authorizationCode));
 
-    log('Authorization code has been revoked: %s', code.authorizationCode);
+    log.info('Authorization code has been revoked: %s', code.authorizationCode);
 
     return result !== 0;
   }

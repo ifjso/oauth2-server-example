@@ -1,7 +1,5 @@
 import OAuthServer, { Request, Response } from 'oauth2-server';
-import debug from 'debug';
-
-const log = debug('OAuthService:log');
+import log from '../logger';
 
 class OAuthService {
   constructor(model) {
@@ -15,7 +13,7 @@ class OAuthService {
 
       const token = await this.oauth.token(request, response);
 
-      log('Successfully obtained a token.');
+      log.info('Successfully obtained a token.');
 
       res.json(token);
     } catch (err) {
@@ -30,7 +28,7 @@ class OAuthService {
 
       const token = await this.oauth.authenticate(request, response);
 
-      log('Successfully authenticated.');
+      log.info('Successfully authenticated.');
 
       res.json(token);
     } catch (err) {
@@ -49,7 +47,7 @@ class OAuthService {
         }
       });
 
-      log('Successfully authorized.');
+      log.info('Successfully authorized.');
 
       res.redirect(`${req.body.redirect_uri}?code=${code.authorizationCode}&state=${req.body.state}`);
     } catch (err) {
