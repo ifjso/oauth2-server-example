@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "babel-node ./src/app",
-    "debug": "DEBUG=* nodemon --exec babel-node ./src/app"
+    "start": "babel-node ./bin/www",
+    "debug": "nodemon --exec babel-node ./bin/www"
   },
   "dependencies": {
     "dotenv-flow": "^3.1.0",
