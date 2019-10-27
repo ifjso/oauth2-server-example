@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import config from '../../config';
+import ddrUser from '../../user/ddrUser';
 
 const db = {};
 
@@ -7,5 +8,7 @@ const sequelize = new Sequelize(config.ddr.database, config.ddr.username, config
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
+
+db.DDRUser = ddrUser(sequelize, Sequelize);
 
 export default db;
