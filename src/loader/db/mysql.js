@@ -12,8 +12,4 @@ db.Sequelize = Sequelize;
 db.DDRUser = ddrUser(db.ddr, Sequelize);
 db.DaylipassUser = daylipassUser(db.dayp, Sequelize);
 
-
-db.DaylipassUser.findAll({})
-  .then((data) => console.log(data));
-
 export default db;
