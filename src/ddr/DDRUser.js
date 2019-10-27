@@ -1,30 +1,36 @@
-export default (sequelize, DataTypes) => sequelize.define('dtb_user', {
+import db from '../loader/db/mysql';
+
+const { ddr, Sequelize } = db;
+
+const DDRUser = ddr.define('dtb_user', {
   user_id: {
-    type: DataTypes.STRING,
+    type: Sequelize.STRING,
     primaryKey: true
   },
   group_id: {
-    type: DataTypes.INTEGER,
+    type: Sequelize.INTEGER,
     allowNull: false
   },
   daylipass_id: {
-    type: DataTypes.INTEGER,
+    type: Sequelize.INTEGER,
     allowNull: false
   },
   pin: {
-    type: DataTypes.STRING,
+    type: Sequelize.STRING,
     allowNull: true
   },
   quit_datetime: {
-    type: DataTypes.DATE,
+    type: Sequelize.DATE,
     allowNull: true
   },
   create_datetime: {
-    type: DataTypes.DATE,
+    type: Sequelize.DATE,
     allowNull: false,
-    defaultValue: DataTypes.NOW
+    defaultValue: Sequelize.NOW
   }
 }, {
   timestamps: false,
   freezeTableName: true
 });
+
+export default DDRUser;
