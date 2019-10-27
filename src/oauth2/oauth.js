@@ -1,8 +1,7 @@
-import Redis from 'ioredis';
 import { format as fmt } from 'util';
 import omit from 'lodash/omit';
 import { log } from '../logger';
-import config from '../config';
+import { cacheDB } from '../loader';
 
 const keyFormats = {
   client: 'clients:%s',
@@ -13,7 +12,7 @@ const keyFormats = {
 
 class OAuth {
   constructor() {
-    this.redisClient = new Redis({ ...config.redis });
+    this.redisClient = cacheDB;
   }
 
   getAccessToken = async (accessToken) => {
