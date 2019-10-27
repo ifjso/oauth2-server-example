@@ -1,14 +1,13 @@
 import Sequelize from 'sequelize';
 import config from '../../config';
-import ddrUser from '../../user/ddrUser';
+import ddrUser from '../../ddr/DDRUser';
 
 const db = {};
 
-const sequelize = new Sequelize(config.ddr.database, config.ddr.username, config.ddr.password, config.ddr);
-
-db.sequelize = sequelize;
+db.ddr = new Sequelize(config.ddr);
+db.dayp = new Sequelize(config.dayp);
 db.Sequelize = Sequelize;
 
-db.DDRUser = ddrUser(sequelize, Sequelize);
+db.DDRUser = ddrUser(db.ddr, Sequelize);
 
 export default db;

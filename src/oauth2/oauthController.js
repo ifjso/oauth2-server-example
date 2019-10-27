@@ -1,5 +1,6 @@
+import crypto from 'crypto';
 import OAuthServer, { Request, Response } from 'oauth2-server';
-import OAuth from './oauth';
+import OAuth from './OAuth';
 import { log } from '../logger';
 
 const oauth = new OAuthServer({ model: new OAuth() });
@@ -26,7 +27,19 @@ const authorize = async (req, res, next) => {
 
     const code = await oauth.authorize(request, response, {
       authenticateHandler: {
-        handle: (request, response) => ({ id: '1' })
+        handle: (req) => {
+          console.log(req.body.client_id);
+
+          const hashedPin = crypto
+            .createHash('sha512')
+            .update(req.body.pin)
+            .digest('hex');
+
+          console.log(hashedPin);
+
+          const id = '1';
+          return { id };
+        }
       }
     });
 
