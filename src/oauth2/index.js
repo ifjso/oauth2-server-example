@@ -1,3 +1,3 @@
-import oauthRouter from './OAuthRouter';
+import OAuthRouter from './OAuthRouter';
 
-export default oauthRouter;
+export default OAuthRouter;
