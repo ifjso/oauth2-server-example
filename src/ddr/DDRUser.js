@@ -33,10 +33,11 @@ const DDRUser = ddr.define('dtb_user', {
   freezeTableName: true
 });
 
-DDRUser.findByDaylipassId = (daylipassId) =>
+DDRUser.findByDaylipassIdAndPin = (daylipassId, pin) =>
   DDRUser.findOne({
     where: {
-      daylipass_id: daylipassId
+      daylipass_id: daylipassId,
+      pin
     }
   });
 
