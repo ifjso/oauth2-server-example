@@ -33,4 +33,11 @@ const DaylipassUser = dayp.define('tbl_user', {
   freezeTableName: true
 });
 
+DaylipassUser.findByMobileNumber = (mobileNumber) =>
+  DaylipassUser.findOne({
+    where: {
+      mobile_number: Sequelize.fn('fnc_com_get_encrypt', mobileNumber)
+    }
+  });
+
 export default DaylipassUser;
