@@ -33,4 +33,11 @@ const DDRUser = ddr.define('dtb_user', {
   freezeTableName: true
 });
 
+DDRUser.findByDaylipassId = (daylipassId) =>
+  DDRUser.findOne({
+    where: {
+      daylipass_id: daylipassId
+    }
+  });
+
 export default DDRUser;
