@@ -7,11 +7,11 @@ const AuthorizationCode = ddr.define('dtb_authorization_code', {
     type: Sequelize.STRING,
     allowNull: false
   },
-  expires_at: {
+  expiresAt: {
     type: Sequelize.DATE,
     allowNull: false
   },
-  redirect_uri: {
+  redirectUri: {
     type: Sequelize.TEXT,
     allowNull: false
   },
@@ -19,25 +19,26 @@ const AuthorizationCode = ddr.define('dtb_authorization_code', {
     type: Sequelize.STRING,
     allowNull: false
   },
-  client_id: {
+  clientId: {
     type: Sequelize.STRING,
     allowNull: false
   },
-  user_id: {
+  userId: {
     type: Sequelize.STRING,
     allowNull: false
   },
-  create_datetime: {
+  createDatetime: {
     type: Sequelize.DATE,
     allowNull: false
   },
-  update_datetime: {
+  updateDatetime: {
     type: Sequelize.DATE,
     allowNull: false
   }
 }, {
   timestamps: false,
-  freezeTableName: true
+  freezeTableName: true,
+  underscored: true
 });
 
 export default AuthorizationCode;

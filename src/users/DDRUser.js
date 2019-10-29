@@ -3,15 +3,15 @@ import db from '../loader/db/mysql';
 const { ddr, Sequelize } = db;
 
 const DDRUser = ddr.define('dtb_user', {
-  user_id: {
+  userId: {
     type: Sequelize.STRING,
     primaryKey: true
   },
-  group_id: {
+  groupId: {
     type: Sequelize.INTEGER,
     allowNull: false
   },
-  daylipass_id: {
+  daylipassId: {
     type: Sequelize.INTEGER,
     allowNull: false
   },
@@ -19,24 +19,25 @@ const DDRUser = ddr.define('dtb_user', {
     type: Sequelize.STRING,
     allowNull: true
   },
-  quit_datetime: {
+  quitDatetime: {
     type: Sequelize.DATE,
     allowNull: true
   },
-  create_datetime: {
+  createDatetime: {
     type: Sequelize.DATE,
     allowNull: false,
     defaultValue: Sequelize.NOW
   }
 }, {
   timestamps: false,
-  freezeTableName: true
+  freezeTableName: true,
+  underscored: true
 });
 
 DDRUser.findByDaylipassIdAndPin = (daylipassId, pin) =>
   DDRUser.findOne({
     where: {
-      daylipass_id: daylipassId,
+      daylipassId,
       pin
     }
   });

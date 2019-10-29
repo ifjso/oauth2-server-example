@@ -3,35 +3,36 @@ import db from '../loader/db/mysql';
 const { ddr, Sequelize } = db;
 
 const OAuthApp = ddr.define('dtb_oauth_app', {
-  client_id: {
+  clientId: {
     type: Sequelize.STRING,
     allowNull: false
   },
-  client_secret: {
+  clientSecret: {
     type: Sequelize.STRING,
     allowNull: false
   },
-  access_token_lifetime: Sequelize.INTEGER,
-  refresh_token_lifetime: Sequelize.INTEGER,
+  accessTokenLifetime: Sequelize.INTEGER,
+  refreshTokenLifetime: Sequelize.INTEGER,
   grants: {
     type: Sequelize.STRING,
     allowNull: false
   },
-  redirect_uris: {
+  redirectUris: {
     type: Sequelize.TEXT,
     allowNull: false
   },
-  create_datetime: {
+  createDatetime: {
     type: Sequelize.DATE,
     allowNull: false
   },
-  update_datetime: {
+  updateDatetime: {
     type: Sequelize.DATE,
     allowNull: false
   }
 }, {
   timestamps: false,
-  freezeTableName: true
+  freezeTableName: true,
+  underscored: true
 });
 
 export default OAuthApp;
