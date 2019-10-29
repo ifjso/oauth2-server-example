@@ -48,13 +48,13 @@ const authenticateHandler = async (req) => {
     return false;
   }
 
-  const ddrUser = await DDRUser.findByDaylipassIdAndPin(daylipassUser.get('user_id'), pin);
+  const ddrUser = await DDRUser.findByDaylipassIdAndPin(daylipassUser.userId, pin);
 
   if (ddrUser === null) {
     return false;
   }
 
-  return { id: ddrUser.get('user_id') };
+  return { id: ddrUser.userId };
 };
 
 const authenticate = async (req, res, next) => {
