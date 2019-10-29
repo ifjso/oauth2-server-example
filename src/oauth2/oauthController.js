@@ -1,8 +1,7 @@
-import crypto from 'crypto';
 import OAuthServer, { Request, Response } from 'oauth2-server';
 import OAuth from './OAuth';
-import DDRUser from '../ddr/DDRUser';
-import DaylipassUser from '../daylipass/DaylipassUser';
+import DDRUser from '../users/DDRUser';
+import DaylipassUser from '../users/DaylipassUser';
 import { log } from '../logger';
 
 const oauth = new OAuthServer({ model: new OAuth() });
@@ -44,8 +43,18 @@ const authorize = async (req, res, next) => {
 const authenticateHandler = async (req) => {
   const { mobileNumber, pin } = req.body;
   const daylipassUser = await DaylipassUser.findByMobileNumber(mobileNumber);
+
+  if (daylipassUser === null) {
+    return false;
+  }
+
   const ddrUser = await DDRUser.findByDaylipassIdAndPin(daylipassUser.get('user_id'), pin);
-  return ddrUser;
+
+  if (ddrUser === null) {
+    return false;
+  }
+
+  return { id: ddrUser.get('user_id') };
 };
 
 const authenticate = async (req, res, next) => {

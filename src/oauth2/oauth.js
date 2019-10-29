@@ -2,6 +2,9 @@ import { format as fmt } from 'util';
 import omit from 'lodash/omit';
 import { log } from '../logger';
 import { cacheDB } from '../loader';
+import OAuthToken from './OAuthToken';
+import OAuthApp from './OAuthApp';
+import AuthorizationCode from './AuthorizationCode';
 
 const keyFormats = {
   client: 'clients:%s',
@@ -11,13 +14,13 @@ const keyFormats = {
 };
 
 class OAuth {
-  constructor() {
-    this.redisClient = cacheDB;
-  }
-
   getAccessToken = async (accessToken) => {
     // TODO cache mysql
-    const token = await this.redisClient.hgetall(fmt(keyFormats.token, accessToken));
+    let token = await cacheDB.hgetall(fmt(keyFormats.token, accessToken));
+
+    if (!token.accessToken) {
+      token = await OAuthToken.findOne({ where: { access_token: accessToken } });
+    }
 
     if (!token || token.accessToken !== accessToken) {
       return;
@@ -35,7 +38,7 @@ class OAuth {
 
   getRefreshToken = async (refreshToken) => {
     // TODO cache mysql
-    const token = await this.redisClient.hgetall(fmt(keyFormats.token, refreshToken));
+    const token = await cacheDB.hgetall(fmt(keyFormats.token, refreshToken));
 
     if (!token || token.refreshToken !== refreshToken) {
       return;
@@ -52,7 +55,7 @@ class OAuth {
   }
 
   getAuthorizationCode = async (authorizationCode) => {
-    const code = await this.redisClient.hgetall(fmt(keyFormats.code, authorizationCode));
+    const code = await cacheDB.hgetall(fmt(keyFormats.code, authorizationCode));
 
     if (!code || code.authorizationCode !== authorizationCode) {
       return;
@@ -71,7 +74,7 @@ class OAuth {
   getClient = async (clientId, clientSecret) => {
     // TODO mysql, delete redis
     // TODO clientSecret가 null이 아니면 검색 조건 쿼리에 포함되어야 함
-    const client = await this.redisClient.hgetall(fmt(keyFormats.client, clientId));
+    const client = await cacheDB.hgetall(fmt(keyFormats.client, clientId));
 
     if (!client) {
       return;
@@ -89,7 +92,7 @@ class OAuth {
   }
 
   saveToken = async (token, client, user) => {
-    const pipe = this.redisClient.pipeline();
+    const pipe = cacheDB.pipeline();
 
     const tokenToSave = {
       ...token,
@@ -121,7 +124,7 @@ class OAuth {
     };
 
     // TODO redis expire
-    await this.redisClient.hmset(fmt(keyFormats.code, code.authorizationCode), codeToSave);
+    await cacheDB.hmset(fmt(keyFormats.code, code.authorizationCode), codeToSave);
 
     // TODO save mysql
 
@@ -135,7 +138,7 @@ class OAuth {
   }
 
   revokeToken = async (token) => {
-    const result = await this.redisClient.del(fmt(keyFormats.token, token.refreshToken));
+    const result = await cacheDB.del(fmt(keyFormats.token, token.refreshToken));
 
     // TODO delete mysql
 
@@ -145,7 +148,7 @@ class OAuth {
   }
 
   revokeAuthorizationCode = async (code) => {
-    const result = await this.redisClient.del(fmt(keyFormats.code, code.authorizationCode));
+    const result = await cacheDB.del(fmt(keyFormats.code, code.authorizationCode));
 
     log.info('Authorization code has been revoked: %s', code.authorizationCode);
 
