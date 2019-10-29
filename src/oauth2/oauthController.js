@@ -1,4 +1,5 @@
 import OAuthServer, { Request, Response } from 'oauth2-server';
+import lang from 'lodash/lang';
 import OAuth from './OAuth';
 import DDRUser from '../users/DDRUser';
 import DaylipassUser from '../users/DaylipassUser';
@@ -44,13 +45,13 @@ const authenticateHandler = async (req) => {
   const { mobileNumber, pin } = req.body;
   const daylipassUser = await DaylipassUser.findByMobileNumber(mobileNumber);
 
-  if (daylipassUser === null) {
+  if (lang.isEmpty(daylipassUser)) {
     return false;
   }
 
   const ddrUser = await DDRUser.findByDaylipassIdAndPin(daylipassUser.userId, pin);
 
-  if (ddrUser === null) {
+  if (lang.isEmpty(ddrUser)) {
     return false;
   }
 
