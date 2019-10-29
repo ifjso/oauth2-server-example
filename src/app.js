@@ -1,8 +1,7 @@
 import express from 'express';
 import morgan from 'morgan';
-import config from './config';
-import { log, stream } from './logger';
-import oauth from './oauth2';
+import { log, stream } from './configs/logger';
+import routes from './routes';
 
 const app = express();
 
@@ -15,7 +14,7 @@ app.get('/status', (req, res) => {
   res.status(200).end();
 });
 
-app.use(config.api.prefix, oauth);
+routes.init(app);
 
 app.use((req, res, next) => {
   const err = new Error('Not found');

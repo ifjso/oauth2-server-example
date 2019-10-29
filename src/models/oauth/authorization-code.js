@@ -1,4 +1,4 @@
-import db from '../loader/db/mysql';
+import db from '../../configs/db';
 
 const { ddr, Sequelize } = db;
 

@@ -1,4 +1,4 @@
-import db from '../loader/db/mysql';
+import db from '../../configs/db';
 
 const { ddr, Sequelize } = db;
 
@@ -42,18 +42,20 @@ const OAuthToken = ddr.define('dtb_oauth_token', {
   underscored: true
 });
 
-OAuthToken.convert = (token) => ({
+OAuthToken.convertToAccessToken = (token) => ({
   accessToken: token.accessToken,
   accessTokenExpiresAt: new Date(token.accessTokenExpiresAt),
   client: { id: token.clientId },
   user: { id: token.userId }
 });
 
-OAuthToken.convertToSave = (token) => ({
-  accessToken: token.accessToken,
-  accessTokenExpiresAt: new Date(token.accessTokenExpiresAt),
-  clientId: token.clientId,
-  userId: token.userId
+OAuthToken.convertToRefreshToken = (token) => ({
+  refreshToken: token.refreshToken,
+  refreshTokenExpiresAt: new Date(token.refreshTokenExpiresAt),
+  client: { id: token.clientId },
+  user: { id: token.userId }
 });
+
+OAuthToken.convert = (token) => ({ ...token.dataValues });
 
 export default OAuthToken;

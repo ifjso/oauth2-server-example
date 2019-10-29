@@ -1,26 +1,9 @@
 import OAuthServer, { Request, Response } from 'oauth2-server';
-import lang from 'lodash/lang';
-import OAuth from './OAuth';
-import DDRUser from '../users/DDRUser';
-import DaylipassUser from '../users/DaylipassUser';
-import { log } from '../logger';
+import _lang from 'lodash/lang';
+import { OAuth, DaylipassUser, DDRUser } from '../../models';
+import { log } from '../../configs/logger';
 
 const oauth = new OAuthServer({ model: new OAuth() });
-
-const token = async (req, res, next) => {
-  try {
-    const request = new Request(req);
-    const response = new Response(res);
-
-    const token = await oauth.token(request, response);
-
-    log.info('Successfully obtained a token.');
-
-    res.json(token);
-  } catch (err) {
-    next(err);
-  }
-};
 
 const authorize = async (req, res, next) => {
   try {
@@ -45,17 +28,32 @@ const authenticateHandler = async (req) => {
   const { mobileNumber, pin } = req.body;
   const daylipassUser = await DaylipassUser.findByMobileNumber(mobileNumber);
 
-  if (lang.isEmpty(daylipassUser)) {
+  if (_lang.isEmpty(daylipassUser)) {
     return false;
   }
 
   const ddrUser = await DDRUser.findByDaylipassIdAndPin(daylipassUser.userId, pin);
 
-  if (lang.isEmpty(ddrUser)) {
+  if (_lang.isEmpty(ddrUser)) {
     return false;
   }
 
   return { id: ddrUser.userId };
+};
+
+const getToken = async (req, res, next) => {
+  try {
+    const request = new Request(req);
+    const response = new Response(res);
+
+    const token = await oauth.token(request, response);
+
+    log.info('Successfully obtained a token.');
+
+    res.json(token);
+  } catch (err) {
+    next(err);
+  }
 };
 
 const authenticate = async (req, res, next) => {
@@ -73,4 +71,4 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-export { token, authorize, authenticate };
+export { getToken, authorize, authenticate };
