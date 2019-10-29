@@ -42,4 +42,18 @@ const OAuthToken = ddr.define('dtb_oauth_token', {
   underscored: true
 });
 
+OAuthToken.convert = (token) => ({
+  accessToken: token.accessToken,
+  accessTokenExpiresAt: new Date(token.accessTokenExpiresAt),
+  client: { id: token.clientId },
+  user: { id: token.userId }
+});
+
+OAuthToken.convertToSave = (token) => ({
+  accessToken: token.accessToken,
+  accessTokenExpiresAt: new Date(token.accessTokenExpiresAt),
+  clientId: token.clientId,
+  userId: token.userId
+});
+
 export default OAuthToken;

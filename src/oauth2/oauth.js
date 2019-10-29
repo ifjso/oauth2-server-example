@@ -1,5 +1,6 @@
 import { format as fmt } from 'util';
 import omit from 'lodash/omit';
+import lang from 'lodash/lang';
 import { log } from '../logger';
 import { cacheDB } from '../loader';
 import OAuthToken from './OAuthToken';
@@ -15,25 +16,21 @@ const keyFormats = {
 
 class OAuth {
   getAccessToken = async (accessToken) => {
-    // TODO cache mysql
     let token = await cacheDB.hgetall(fmt(keyFormats.token, accessToken));
 
-    if (!token.accessToken) {
-      token = await OAuthToken.findOne({ where: { access_token: accessToken } });
-    }
+    if (lang.isEmpty(token)) {
+      token = await OAuthToken.findOne({ where: { accessToken } });
 
-    if (!token || token.accessToken !== accessToken) {
-      return;
+      if (lang.isEmpty(token)) {
+        return;
+      }
+
+      cacheDB.hmset(fmt(keyFormats.token, token.accessToken), OAuthToken.convertToSave(token));
     }
 
     log.info('Access token is found: %s', token.accessToken);
 
-    return {
-      accessToken: token.accessToken,
-      accessTokenExpiresAt: new Date(token.accessTokenExpiresAt),
-      client: { id: token.clientId },
-      user: { id: token.userId }
-    };
+    return OAuthToken.convert(token);
   }
 
   getRefreshToken = async (refreshToken) => {
