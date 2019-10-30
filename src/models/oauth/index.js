@@ -25,7 +25,7 @@ class OAuth {
         return;
       }
 
-      CacheDB.hmset(fmt(keyFormats.token, accessToken), OAuthToken.convert(token));
+      CacheDB.hmset(fmt(keyFormats.token, accessToken), OAuthToken.convertToSave(token));
     }
 
     log.info('Access token is found: %s', accessToken);
@@ -50,20 +50,19 @@ class OAuth {
   }
 
   getAuthorizationCode = async (authorizationCode) => {
-    const code = await CacheDB.hgetall(fmt(keyFormats.code, authorizationCode));
+    let code = await CacheDB.hgetall(fmt(keyFormats.code, authorizationCode));
 
-    if (!code || code.authorizationCode !== authorizationCode) {
-      return;
+    if (_lang.isEmpty(code)) {
+      code = await AuthorizationCode.findOne({ where: { code: authorizationCode } });
+
+      if (_lang.isEmpty(code)) {
+        return;
+      }
     }
 
     log.info('Authorization code is found: %s', code.authorizationCode);
 
-    return {
-      ..._omit(code, ['scope', 'clientId', 'userId']),
-      expiresAt: new Date(code.expiresAt),
-      client: { id: code.clientId },
-      user: { id: code.userId }
-    };
+    return AuthorizationCode.convert(code);
   }
 
   getClient = async (clientId, clientSecret) => {
@@ -139,7 +138,7 @@ class OAuth {
 
     log.info('Token has been revoked: %s', token.refreshToken);
 
-    return result !== 0;
+    return true;
   }
 
   revokeAuthorizationCode = async (code) => {

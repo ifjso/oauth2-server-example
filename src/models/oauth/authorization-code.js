@@ -3,7 +3,8 @@ import db from '../../configs/db';
 const { ddr, Sequelize } = db;
 
 const AuthorizationCode = ddr.define('dtb_authorization_code', {
-  code: {
+  authorizationCode: {
+    field: 'code',
     type: Sequelize.STRING,
     allowNull: false
   },
@@ -39,6 +40,14 @@ const AuthorizationCode = ddr.define('dtb_authorization_code', {
   timestamps: false,
   freezeTableName: true,
   underscored: true
+});
+
+AuthorizationCode.convert = (code) => ({
+  authorizationCode: code.authorizationCode,
+  expiresAt: new Date(code.expiresAt),
+  redirectUri: code.redirectUri,
+  client: { id: code.clientId },
+  user: { id: code.userId }
 });
 
 export default AuthorizationCode;

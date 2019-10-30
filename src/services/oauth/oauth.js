@@ -65,7 +65,7 @@ const authenticate = async (req, res, next) => {
 
     log.info('Successfully authenticated.');
 
-    res.json(token);
+    res.json({ token });
   } catch (err) {
     next(err);
   }
