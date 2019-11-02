@@ -11,7 +11,7 @@ const User = microdust.define('user', {
     type: Sequelize.INTEGER,
     allowNull: false
   },
-  mobileNumber: {
+  email: {
     type: Sequelize.STRING,
     allowNull: false
   },
@@ -30,10 +30,10 @@ const User = microdust.define('user', {
   }
 });
 
-User.findByMobileNumberAndPin = (mobileNumber, pin) =>
+User.findByEmailAndPin = (email, pin) =>
   User.findOne({
     where: {
-      mobileNumber,
+      email,
       pin
     }
   });

@@ -31,9 +31,9 @@ const authorize = async (req, res, next) => {
 };
 
 const authenticateHandler = async (req) => {
-  const { mobileNumber, pin } = req.body;
+  const { email, pin } = req.body;
 
-  const user = await User.findByMobileNumberAndPin(mobileNumber, pin);
+  const user = await User.findByEmailAndPin(email, pin);
 
   if (_lang.isEmpty(user)) {
     return false;
