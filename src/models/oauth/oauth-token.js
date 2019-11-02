@@ -1,8 +1,8 @@
-import db from '../../configs/db';
+import db from '../../loader/db';
 
-const { ddr, Sequelize } = db;
+const { microdust, Sequelize } = db;
 
-const OAuthToken = ddr.define('dtb_oauth_token', {
+const OAuthToken = microdust.define('oauth_token', {
   accessToken: {
     type: Sequelize.STRING,
     allowNull: false

@@ -1,6 +1,6 @@
 import winston, { format } from 'winston';
 import WinstonDaily from 'winston-daily-rotate-file';
-import config from './env';
+import config from 'config';
 
 const {
   combine, timestamp, colorize, splat, printf
@@ -11,7 +11,7 @@ const logFormat = printf(({ timestamp, level, message }) =>
 
 const logOptions = {
   file: {
-    filename: `${config.log.path}/oauth_%DATE%.log`,
+    filename: `${config.get('logPath')}/oauth_%DATE%.log`,
     datePattern: 'YYYY-MM-DD',
     zippedArchive: true,
     maxSize: '10m',
@@ -38,14 +38,14 @@ const log = winston.createLogger({
     new WinstonDaily({
       ...logOptions.file,
       level: 'error',
-      filename: `${config.log.path}/error-oauth_%DATE%.log`
+      filename: `${config.get('logPath')}/error-oauth_%DATE%.log`
     }),
     new WinstonDaily(logOptions.file)
   ],
   exceptionHandlers: [
     new WinstonDaily({
       ...logOptions.file,
-      filename: `${config.log.path}/exception-oauth_%DATE%.log`
+      filename: `${config.get('logPath')}/exception-oauth_%DATE%.log`
     })
   ],
   humanReadableUnhandledException: true,

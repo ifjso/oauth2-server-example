@@ -1,8 +1,8 @@
+import config from 'config';
 import apiRoute from './apis';
-import env from '../configs/env';
 
 const init = (app) => {
-  app.use(env.api.prefix, apiRoute);
+  app.use(config.get('basePath'), apiRoute);
 };
 
 export default { init };

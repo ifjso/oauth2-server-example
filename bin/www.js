@@ -1,9 +1,9 @@
 import http from 'http';
+import config from 'config';
 import app from '../src/app';
-import config from '../src/configs/env';
-import { log } from '../src/configs/logger';
+import { log } from '../src/loader/logger';
 
-const port = normalizePort(config.port || '3000');
+const port = normalizePort(config.get('port') || '3000');
 app.set('port', port);
 
 const server = http.createServer(app);

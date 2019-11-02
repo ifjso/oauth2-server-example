@@ -1,8 +1,8 @@
 import { format as fmt } from 'util';
 import _omit from 'lodash/omit';
 import _lang from 'lodash/lang';
-import { log } from '../../configs/logger';
-import CacheDB from '../../configs/cache-db';
+import { log } from '../../loader/logger';
+import CacheDB from '../../loader/cache-db';
 import OAuthToken from './oauth-token';
 import OAuthApp from './oauth-app';
 import AuthorizationCode from './authorization-code';

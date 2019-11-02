@@ -1,8 +1,8 @@
-import db from '../../configs/db';
+import db from '../loader/db';
 
-const { ddr, Sequelize } = db;
+const { microdust, Sequelize } = db;
 
-const DDRUser = ddr.define('dtb_user', {
+const User = microdust.define('user', {
   userId: {
     type: Sequelize.STRING,
     primaryKey: true
@@ -11,8 +11,8 @@ const DDRUser = ddr.define('dtb_user', {
     type: Sequelize.INTEGER,
     allowNull: false
   },
-  daylipassId: {
-    type: Sequelize.INTEGER,
+  mobileNumber: {
+    type: Sequelize.STRING,
     allowNull: false
   },
   pin: {
@@ -34,12 +34,12 @@ const DDRUser = ddr.define('dtb_user', {
   underscored: true
 });
 
-DDRUser.findByDaylipassIdAndPin = (daylipassId, pin) =>
-  DDRUser.findOne({
+User.findByMobileNumberAndPin = (mobileNumber, pin) =>
+  User.findOne({
     where: {
-      daylipassId,
+      mobileNumber,
       pin
     }
   });
 
-export default DDRUser;
+export default User;

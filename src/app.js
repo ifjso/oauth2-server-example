@@ -1,6 +1,6 @@
 import express from 'express';
 import morgan from 'morgan';
-import { log, stream } from './configs/logger';
+import { log, stream } from './loader/logger';
 import routes from './routes';
 
 const app = express();

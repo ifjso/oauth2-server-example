@@ -1,5 +1,4 @@
 import OAuth from './oauth';
-import DaylipassUser from './users/daylipass-user';
-import DDRUser from './users/ddr-user';
+import User from './user';
 
-export { OAuth, DaylipassUser, DDRUser };
+export { OAuth, User };

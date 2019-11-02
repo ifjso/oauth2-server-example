@@ -1,8 +1,8 @@
-import db from '../../configs/db';
+import db from '../../loader/db';
 
-const { ddr, Sequelize } = db;
+const { microdust, Sequelize } = db;
 
-const AuthorizationCode = ddr.define('dtb_authorization_code', {
+const AuthorizationCode = microdust.define('authorization_code', {
   authorizationCode: {
     field: 'code',
     type: Sequelize.STRING,

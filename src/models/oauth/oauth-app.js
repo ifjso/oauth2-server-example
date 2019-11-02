@@ -1,8 +1,8 @@
-import db from '../../configs/db';
+import db from '../../loader/db';
 
-const { ddr, Sequelize } = db;
+const { microdust, Sequelize } = db;
 
-const OAuthApp = ddr.define('dtb_oauth_app', {
+const OAuthApp = microdust.define('oauth_app', {
   clientId: {
     type: Sequelize.STRING,
     allowNull: false

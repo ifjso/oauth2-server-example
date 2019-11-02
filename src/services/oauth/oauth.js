@@ -1,7 +1,7 @@
 import OAuthServer, { Request, Response } from 'oauth2-server';
 import _lang from 'lodash/lang';
-import { OAuth, DaylipassUser, DDRUser } from '../../models';
-import { log } from '../../configs/logger';
+import { OAuth, User } from '../../models';
+import { log } from '../../loader/logger';
 
 const oauth = new OAuthServer({ model: new OAuth() });
 
@@ -26,19 +26,14 @@ const authorize = async (req, res, next) => {
 
 const authenticateHandler = async (req) => {
   const { mobileNumber, pin } = req.body;
-  const daylipassUser = await DaylipassUser.findByMobileNumber(mobileNumber);
 
-  if (_lang.isEmpty(daylipassUser)) {
+  const user = await User.findByMobileNumberAndPin(mobileNumber, pin);
+
+  if (_lang.isEmpty(user)) {
     return false;
   }
 
-  const ddrUser = await DDRUser.findByDaylipassIdAndPin(daylipassUser.userId, pin);
-
-  if (_lang.isEmpty(ddrUser)) {
-    return false;
-  }
-
-  return { id: ddrUser.userId };
+  return { id: user.userId };
 };
 
 const getToken = async (req, res, next) => {
