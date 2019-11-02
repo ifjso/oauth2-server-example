@@ -1,29 +1,29 @@
 {
-	"basePath": "/api",
-	"port": 3000,
-	"logPath": "./logs",
-	"redis": {
-		"host": "127.0.0.1",
-		"port": 6379
-	},
-	"mysql": {
-		"microdust": {
-			"username": "microdust",
-			"password": "micr0dust",
-			"database": "microdust_local",
-			"host": "127.0.0.1",
-			"port": 3306,
-			"dialect": "mysql",
-			"define": {
-				"timestamps": false,
-				"freezeTableName": true,
-				"underscored": true
-			}
-		}
-	},
-	"oauth": {
-		"authorizationCodeLifetime": 300,
-		"accessTokenLifetime": 86400,
-		"refreshTokenLifetime": 2592000
-	}
+  "basePath": "/api",
+  "port": 3000,
+  "logPath": "./logs",
+  "redis": {
+    "host": "127.0.0.1",
+    "port": 6379
+  },
+  "mysql": {
+    "microdust": {
+      "username": "microdust",
+      "password": "micr0dust",
+      "database": "microdust_local",
+      "host": "127.0.0.1",
+      "port": 3306,
+      "dialect": "mysql",
+      "define": {
+        "timestamps": false,
+        "freezeTableName": true,
+        "underscored": true
+      }
+    }
+  },
+  "oauth": {
+    "authorizationCodeLifetime": 300,
+    "accessTokenLifetime": 86400,
+    "refreshTokenLifetime": 2592000
+  }
 }
