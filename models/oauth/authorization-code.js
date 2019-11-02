@@ -16,10 +16,6 @@ const AuthorizationCode = microdust.define('authorization_code', {
     type: Sequelize.TEXT,
     allowNull: false
   },
-  grants: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
   clientId: {
     type: Sequelize.STRING,
     allowNull: false
@@ -27,19 +23,7 @@ const AuthorizationCode = microdust.define('authorization_code', {
   userId: {
     type: Sequelize.STRING,
     allowNull: false
-  },
-  createDatetime: {
-    type: Sequelize.DATE,
-    allowNull: false
-  },
-  updateDatetime: {
-    type: Sequelize.DATE,
-    allowNull: false
   }
-}, {
-  timestamps: false,
-  freezeTableName: true,
-  underscored: true
 });
 
 AuthorizationCode.convert = (code) => ({
@@ -48,6 +32,12 @@ AuthorizationCode.convert = (code) => ({
   redirectUri: code.redirectUri,
   client: { id: code.clientId },
   user: { id: code.userId }
+});
+
+AuthorizationCode.convertToSave = ({ code, client, user }) => ({
+  ...code,
+  clientId: client.id,
+  userId: user.id
 });
 
 export default AuthorizationCode;

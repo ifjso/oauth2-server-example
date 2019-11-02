@@ -27,19 +27,16 @@ const OAuthToken = microdust.define('oauth_token', {
   userId: {
     type: Sequelize.STRING,
     allowNull: false
-  },
-  createDatetime: {
-    type: Sequelize.DATE,
-    allowNull: false
-  },
-  updateDatetime: {
-    type: Sequelize.DATE,
-    allowNull: false
   }
-}, {
-  timestamps: false,
-  freezeTableName: true,
-  underscored: true
+});
+
+OAuthToken.convert = (token) => ({
+  accessToken: token.accessToken,
+  accessTokenExpiresAt: new Date(token.accessTokenExpiresAt),
+  refreshToken: token.refreshToken,
+  refreshTokenExpiresAt: new Date(token.refreshTokenExpiresAt),
+  client: { id: token.clientId },
+  user: { id: token.userId }
 });
 
 OAuthToken.convertToSave = (token) => ({

@@ -20,19 +20,15 @@ const OAuthApp = microdust.define('oauth_app', {
   redirectUris: {
     type: Sequelize.TEXT,
     allowNull: false
-  },
-  createDatetime: {
-    type: Sequelize.DATE,
-    allowNull: false
-  },
-  updateDatetime: {
-    type: Sequelize.DATE,
-    allowNull: false
   }
-}, {
-  timestamps: false,
-  freezeTableName: true,
-  underscored: true
+});
+
+OAuthApp.convert = (client) => ({
+  id: client.clientId,
+  redirectUris: client.redirectUris.split(','),
+  grants: client.grants.split(','),
+  accessTokenLifetime: Number(client.accessTokenLifetime),
+  refreshTokenLifetime: Number(client.refreshTokenLifetime)
 });
 
 export default OAuthApp;

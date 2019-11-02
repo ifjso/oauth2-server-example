@@ -1,5 +1,5 @@
 import { format as fmt } from 'util';
-import _omit from 'lodash/omit';
+import config from 'config';
 import _lang from 'lodash/lang';
 import { log } from '../../loader/logger';
 import CacheDB from '../../loader/cache-db';
@@ -66,75 +66,67 @@ class OAuth {
   }
 
   getClient = async (clientId, clientSecret) => {
-    // TODO mysql, delete redis
-    // TODO clientSecret가 null이 아니면 검색 조건 쿼리에 포함되어야 함
-    const client = await CacheDB.hgetall(fmt(keyFormats.client, clientId));
+    const condition = { clientId };
 
-    if (!client) {
+    if (!_lang.isEmpty(clientSecret)) {
+      Object.assign(condition, { clientSecret });
+    }
+
+    const client = await OAuthApp.findOne({ where: condition });
+
+    if (_lang.isEmpty(client)) {
       return;
     }
 
     log.info('Client is found: %s', client.id);
 
-    return {
-      ..._omit(client, 'secret'),
-      redirectUris: client.redirectUris.split(','),
-      grants: client.grants.split(','),
-      accessTokenLifetime: Number(client.accessTokenLifetime),
-      refreshTokenLifetime: Number(client.refreshTokenLifetime)
-    };
+    return OAuthApp.convert(client);
   }
 
   saveToken = async (token, client, user) => {
     const pipe = CacheDB.pipeline();
 
-    const tokenToSave = {
+    const tokenToSave = OAuthToken.convertToSave({
       ...token,
       clientId: client.id,
       userId: user.id
-    };
+    });
 
-    // TODO redis expire
     await pipe
       .hmset(fmt(keyFormats.token, token.accessToken), tokenToSave)
+      .expire(fmt(keyFormats.token, token.accessToken), config.get('oauth.accessTokenLifetime'))
       .hmset(fmt(keyFormats.token, token.refreshToken), tokenToSave)
+      .expire(fmt(keyFormats.token, token.refreshToken), config.get('oauth.refreshTokenLifetime'))
       .exec();
 
-    // TODO save mysql
+    await OAuthToken.create(tokenToSave);
+
     log.info('Token has been saved:%s, %s', token.accessToken, token.refreshToken);
 
-    return {
-      ..._omit(token, ['authorizationCode', 'scope']),
-      client: { id: client.id },
-      user: { id: user.id }
-    };
+    return OAuthToken.convert(tokenToSave);
   }
 
   saveAuthorizationCode = async (code, client, user) => {
-    const codeToSave = {
-      ...code,
-      clientId: client.id,
-      userId: user.id
-    };
+    const pipe = CacheDB.pipeline();
 
-    // TODO redis expire
-    await CacheDB.hmset(fmt(keyFormats.code, code.authorizationCode), codeToSave);
+    const codeToSave = AuthorizationCode.convertToSave({ code, client, user });
 
-    // TODO save mysql
+    await pipe
+      .hmset(fmt(keyFormats.code, code.authorizationCode), codeToSave)
+      .expire(fmt(keyFormats.code, code.authorizationCode), config.get('oauth.authorizationCodeLifetime'))
+      .exec();
+
+    await AuthorizationCode.create(codeToSave);
 
     log.info('Authorization code has been saved: %s', code.authorizationCode);
 
-    return {
-      ..._omit(code, 'scope'),
-      client: { id: client.id },
-      user: { id: user.id }
-    };
+    return AuthorizationCode.convert(codeToSave);
   }
 
   revokeToken = async (token) => {
-    const result = await CacheDB.del(fmt(keyFormats.token, token.refreshToken));
+    await CacheDB.del(fmt(keyFormats.token, token.refreshToken));
 
-    // TODO delete mysql
+    await OAuthToken.destroy({ where: { refreshToken: token.refreshToken } });
 
     log.info('Token has been revoked: %s', token.refreshToken);
 
@@ -142,11 +134,13 @@ class OAuth {
   }
 
   revokeAuthorizationCode = async (code) => {
-    const result = await CacheDB.del(fmt(keyFormats.code, code.authorizationCode));
+    await CacheDB.del(fmt(keyFormats.code, code.authorizationCode));
+
+    await AuthorizationCode.destroy({ where: { code: code.authorizationCode } });
 
     log.info('Authorization code has been revoked: %s', code.authorizationCode);
 
-    return result !== 0;
+    return true;
   }
 }
 

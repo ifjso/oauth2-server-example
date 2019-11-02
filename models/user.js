@@ -28,10 +28,6 @@ const User = microdust.define('user', {
     allowNull: false,
     defaultValue: Sequelize.NOW
   }
-}, {
-  timestamps: false,
-  freezeTableName: true,
-  underscored: true
 });
 
 User.findByMobileNumberAndPin = (mobileNumber, pin) =>
