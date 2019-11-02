@@ -1,9 +1,15 @@
 import OAuthServer, { Request, Response } from 'oauth2-server';
 import _lang from 'lodash/lang';
+import config from 'config';
 import { OAuth, User } from '../../models';
 import { log } from '../../loader/logger';
 
-const oauth = new OAuthServer({ model: new OAuth() });
+const oauth = new OAuthServer({
+  model: new OAuth(),
+  authorizationCodeLifetime: config.get('oauth.authorizationCodeLifetime'),
+  accessTokenLifetime: config.get('oauth.accessTokenLifetime'),
+  refreshTokenLifetime: config.get('oauth.refreshTokenLifetime')
+});
 
 const authorize = async (req, res, next) => {
   try {
