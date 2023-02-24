@@ -15,7 +15,7 @@
     "morgan": "^1.9.1",
     "mysql2": "^1.7.0",
     "oauth2-server": "^3.0.1",
-    "sequelize": "^5.21.1",
+    "sequelize": "^6.29.0",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.2.1"
   },
